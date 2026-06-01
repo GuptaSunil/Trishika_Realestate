@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block hero %}
+<div class="hero">
+  <div class="container hero-content">
+    <div>
+      <p class="eyebrow">{{ page_title }}</p>
+      <h1>{{ page_title }}</h1>
+      <p class="hero-copy">{{ page_description }}</p>
+    </div>
+    <div class="hero-card">
+      <p>Search premium properties with trusted support from Trishika Properties.</p>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<section class="container section-block">
+  <div class="listings">
+    {% for listing in listings %}
+    <article class="card">
+      <img class="listing-image" src="{{ listing.image_url }}" alt="{{ listing.title }}" />
+      <span class="type-pill {{ listing.sale_type | lower }}">{{ listing.sale_type }}</span>
+      <h3>{{ listing.title }}</h3>
+      <p class="location">{{ listing.location }}</p>
+      <p class="price">{{ listing.price }}</p>
+      <div class="specs">
+        <span>{{ listing.beds }} beds</span>
+        <span>{{ listing.baths }} baths</span>
+        <span>{{ listing.area }}</span>
+      </div>
+      <p>{{ listing.description }}</p>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

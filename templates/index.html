@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block hero %}
+<div class="hero">
+  <div class="container hero-content">
+    <div>
+      <p class="eyebrow">Trishika Properties</p>
+      <h1>Welcome to Trishika Properties</h1>
+      <p class="hero-copy">Discover premium outright homes and smart rental options across India with a modern, trustworthy experience.</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="{{ url_for('outright') }}">View Outright</a>
+        <a class="btn btn-secondary" href="{{ url_for('rentals') }}">View Rentals</a>
+      </div>
+    </div>
+    <div class="hero-image">
+      <div class="hero-card">
+        <h2>Featured Launch</h2>
+        <p>Luxury villa living in Bengaluru with premium amenities and spacious design.</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<section class="overview-grid container">
+  <article class="stat-card">
+    <p class="stat-label">Premium Outright Homes</p>
+    <h2>{{ outright_count }}</h2>
+  </article>
+  <article class="stat-card">
+    <p class="stat-label">Trusted Rentals</p>
+    <h2>{{ rental_count }}</h2>
+  </article>
+  <article class="stat-card">
+    <p class="stat-label">PG for Boys & Girls</p>
+    <h2>{{ pg_count }}</h2>
+  </article>
+  <article class="stat-card">
+    <p class="stat-label">Quick Enquiry</p>
+    <h2><a href="{{ url_for('enquiry') }}" class="link-inline">Send a Message</a></h2>
+  </article>
+</section>
+
+<section class="container section-block">
+  <div class="section-heading">
+    <span class="eyebrow">Featured Properties</span>
+    <h2>Handpicked listings for your next move</h2>
+  </div>
+
+  <div class="feature-grid">
+    <article class="feature-card feature-outright">
+      <p class="feature-label">Outright Purchase</p>
+      <h3>Buy with confidence</h3>
+      <p>Explore ready-to-move homes with competitive pricing and premium amenities.</p>
+      <a class="link-inline" href="{{ url_for('outright') }}">View Outright Listings →</a>
+    </article>
+    <article class="feature-card feature-rental">
+      <p class="feature-label">Rental Homes</p>
+      <h3>Quality rental options</h3>
+      <p>Discover curated rental properties across top Indian cities with fast approvals.</p>
+      <a class="link-inline" href="{{ url_for('rentals') }}">View Rental Listings →</a>
+    </article>
+    <article class="feature-card feature-pg">
+      <p class="feature-label">PG for Boys & Girls</p>
+      <h3>Safe and comfortable PGs</h3>
+      <p>Find gender-specific PG stays with food, Wi-Fi, and supportive staff.</p>
+      <a class="link-inline" href="{{ url_for('pg') }}">View PG Listings →</a>
+    </article>
+  </div>
+
+  <div class="listings">
+    {% for listing in listings %}
+    <article class="card">
+      <img class="listing-image" src="{{ listing.image_url }}" alt="{{ listing.title }}" />
+      <span class="type-pill {{ listing.sale_type | lower }}">{{ listing.sale_type }}</span>
+      <h3>{{ listing.title }}</h3>
+      <p class="location">{{ listing.location }}</p>
+      <p class="price">{{ listing.price }}</p>
+      <div class="specs">
+        <span>{{ listing.beds }} beds</span>
+        <span>{{ listing.baths }} baths</span>
+        <span>{{ listing.area }}</span>
+      </div>
+      <p>{{ listing.description }}</p>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container section-block">
+  <div class="admin-panel">
+    <div class="top-row">
+      <h2 style="margin:0">Enquiries</h2>
+      <div style="display:flex;gap:1rem;align-items:center">
+        <form method="get" style="display:flex;gap:0.5rem;align-items:center">
+          <label style="font-size:0.85rem;color:#475569">From</label>
+          <input type="date" name="date_from" id="date_from" value="{{ date_from or today_date }}" />
+          <label style="font-size:0.85rem;color:#475569">To</label>
+          <input type="date" name="date_to" id="date_to" value="{{ date_to or today_date }}" />
+          <button type="submit" class="btn">Filter</button>
+        </form>
+        <div class="admin-actions"><a href="{{ url_for('admin_logout') }}">Logout</a></div>
+      </div>
+    </div>
+
+    <div id="error-notification" style="display:none;position:fixed;top:2rem;right:2rem;background:linear-gradient(135deg,#fee2e2,#fecaca);border-left:4px solid #dc2626;border-radius:0.5rem;padding:1rem 1.5rem;box-shadow:0 10px 30px rgba(220,38,38,0.2);z-index:9999;max-width:400px;animation:slideIn 0.3s ease-out">
+      <div style="display:flex;align-items:flex-start;gap:0.75rem">
+        <div style="font-size:1.5rem;color:#dc2626;line-height:1">⚠️</div>
+        <div>
+          <p style="margin:0;font-weight:700;color:#7f1d1d;font-size:0.95rem">Invalid Date Range</p>
+          <p style="margin:0.35rem 0 0;color:#991b1b;font-size:0.9rem">"From date" cannot be greater than "To date".</p>
+        </div>
+        <button onclick="document.getElementById('error-notification').style.display='none'" style="background:none;border:none;color:#7f1d1d;cursor:pointer;font-size:1.2rem;padding:0;margin:0;line-height:1">✕</button>
+      </div>
+    </div>
+
+    <style>
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateX(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+    </style>
+
+    <script>
+      const dateFromInput = document.getElementById('date_from');
+      const dateToInput = document.getElementById('date_to');
+      const errorNotification = document.getElementById('error-notification');
+
+      function showError() {
+        errorNotification.style.display = 'flex';
+        setTimeout(() => {
+          errorNotification.style.display = 'none';
+        }, 4000);
+      }
+
+      function validateDateRange() {
+        if (dateFromInput.value && dateToInput.value) {
+          const fromDate = new Date(dateFromInput.value);
+          const toDate = new Date(dateToInput.value);
+          
+          if (fromDate > toDate) {
+            showError();
+            dateFromInput.value = dateToInput.value;
+          }
+        }
+      }
+
+      dateFromInput.addEventListener('change', validateDateRange);
+      dateToInput.addEventListener('change', validateDateRange);
+    </script>
+
+    {% if inquiries %}
+    <div style="overflow:auto">
+    <table class="listings-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Phone</th>
+        <th>Property</th>
+        <th>Message</th>
+        <th>Received</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for iq in inquiries %}
+      <tr>
+        <td>{{ iq['id'] }}</td>
+        <td>{{ iq['name'] }}</td>
+        <td>{{ iq['email'] }}</td>
+        <td>{{ iq['phone'] or '-' }}</td>
+        <td><span class="badge property">{{ iq['property_name'] or 'General' }}</span></td>
+        <td class="message-cell">
+          {% if iq['message']|length > 120 %}
+            <span title="{{ iq['message'] }}">{{ iq['message'][:120] }}…</span>
+            <details style="margin-top:0.35rem;"><summary style="cursor:pointer;color:#2563eb;font-weight:600">View</summary><div style="padding-top:0.5rem">{{ iq['message'] }}</div></details>
+          {% else %}
+            <span>{{ iq['message'] }}</span>
+          {% endif %}
+        </td>
+        <td>{{ iq['created_at'] }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+    </div>
+
+    {% else %}
+      <div>No enquiries yet.</div>
+    {% endif %}
+
+    {% if total_pages and total_pages > 1 %}
+      <nav style="margin-top:1rem;display:flex;justify-content:center;">
+        <ul style="list-style:none;display:flex;gap:0.5rem;padding:0;margin:0">
+          {% for p in range(1, total_pages + 1) %}
+            <li>
+              <a href="{{ url_for('admin_inquiries', page=p, date_from=date_from, date_to=date_to) }}" class="btn" style="background: {% if p==page %}#1e40af{% else %}#eef2ff{% endif %}; color: {% if p==page %}#fff{% else %}#1e3a8a{% endif %}; padding:0.45rem 0.7rem; border-radius:0.5rem; font-weight:600">{{ p }}</a>
+            </li>
+          {% endfor %}
+        </ul>
+      </nav>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ title or 'Trishika Properties' }}</title>
+    <!-- Use Poppins for refined tabular typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container header-inner">
+        <a class="brand" href="{{ url_for('home') }}">Trishika Properties</a>
+        <nav class="nav-links">
+          <a href="{{ url_for('home') }}" class="{{ 'active' if active_page == 'home' else '' }}">Home</a>
+          <a href="{{ url_for('outright') }}" class="{{ 'active' if active_page == 'outright' else '' }}">Outright</a>
+          <a href="{{ url_for('rentals') }}" class="{{ 'active' if active_page == 'rentals' else '' }}">Rentals</a>
+          <a href="{{ url_for('pg') }}" class="{{ 'active' if active_page == 'pg' else '' }}">PG</a>
+          <a href="{{ url_for('enquiry') }}" class="{{ 'active' if active_page == 'enquiry' else '' }}">Enquiry</a>
+        </nav>
+      </div>
+    </header>
+
+    {% block hero %}{% endblock %}
+
+    <main>
+      {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+      <div class="container">
+        <p>Trishika Properties · Premium real estate listings across India.</p>
+      </div>
+    </footer>
+  </body>
+</html>

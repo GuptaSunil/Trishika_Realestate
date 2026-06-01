@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block hero %}
+<div class="hero">
+  <div class="container hero-content">
+    <div>
+      <p class="eyebrow">Enquiry</p>
+      <h1>Contact Trishika Properties</h1>
+      <p class="hero-copy">Send your property interest or rental enquiry and our team will reach out to you quickly.</p>
+    </div>
+    <div class="hero-card">
+      <p>We handle outright and rental inquiries with priority support.</p>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<section class="container section-block">
+  <div class="enquiry-panel">
+    <h2>Send an enquiry</h2>
+    {% if sent %}
+    <div class="notice">Thank you! Your enquiry has been submitted successfully.</div>
+    {% endif %}
+    <form method="post">
+      <div class="form-group">
+        <label for="name">Name</label>
+        <input id="name" name="name" type="text" placeholder="Enter your full name" required />
+      </div>
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" placeholder="name@example.com" required />
+      </div>
+      <div class="form-group">
+        <label for="phone">Phone</label>
+        <input id="phone" name="phone" type="text" placeholder="Optional phone number" />
+      </div>
+      <div class="form-group">
+        <label for="property_name">Property of interest</label>
+        <select id="property_name" name="property_name">
+          <option value="General enquiry">General enquiry</option>
+          {% for property_name in property_names %}
+          <option value="{{ property_name }}">{{ property_name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="message">Message</label>
+        <textarea id="message" name="message" placeholder="Tell us what you're looking for" required></textarea>
+      </div>
+      <button type="submit">Submit Enquiry</button>
+    </form>
+  </div>
+</section>
+{% endblock %}
