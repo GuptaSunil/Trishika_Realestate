@@ -53,20 +53,51 @@
         }, 4000);
       }
 
-      function validateDateRange() {
-        if (dateFromInput.value && dateToInput.value) {
-          const fromDate = new Date(dateFromInput.value);
-          const toDate = new Date(dateToInput.value);
-          
-          if (fromDate > toDate) {
-            showError();
-            dateFromInput.value = dateToInput.value;
-          }
-        }
+      // Keep previous values so we can revert invalid changes
+      let prevFrom = dateFromInput.value;
+      let prevTo = dateToInput.value;
+
+      // Ensure date pickers cannot choose invalid ranges by using min/max
+      function syncMinMax() {
+        if (dateFromInput.value) dateToInput.min = dateFromInput.value;
+        else dateToInput.removeAttribute('min');
+        if (dateToInput.value) dateFromInput.max = dateToInput.value;
+        else dateFromInput.removeAttribute('max');
       }
 
+      function validateDateRange(e) {
+        const changed = e.target === dateFromInput ? 'from' : 'to';
+        const fromVal = dateFromInput.value;
+        const toVal = dateToInput.value;
+        if (fromVal && toVal) {
+          const fromDate = new Date(fromVal);
+          const toDate = new Date(toVal);
+          if (fromDate > toDate) {
+            showError();
+            // revert the user's change rather than silently modifying the other field
+            if (changed === 'from') {
+              dateFromInput.value = prevFrom;
+            } else {
+              dateToInput.value = prevTo;
+            }
+            // keep min/max in sync after revert
+            syncMinMax();
+            return;
+          }
+        }
+        // update previous values and sync boundaries
+        prevFrom = dateFromInput.value;
+        prevTo = dateToInput.value;
+        syncMinMax();
+      }
+
+      dateFromInput.addEventListener('focus', () => { prevFrom = dateFromInput.value; });
+      dateToInput.addEventListener('focus', () => { prevTo = dateToInput.value; });
       dateFromInput.addEventListener('change', validateDateRange);
       dateToInput.addEventListener('change', validateDateRange);
+
+      // initialize min/max on load
+      syncMinMax();
     </script>
 
     {% if inquiries %}

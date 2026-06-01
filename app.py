@@ -209,6 +209,16 @@ def admin_inquiries():
     per_page = 10
     date_from = request.args.get("date_from") or None
     date_to = request.args.get("date_to") or None
+    # Sanitize date range: if both provided and invalid, adjust date_to to date_from
+    try:
+        if date_from and date_to:
+            # ensure format YYYY-MM-DD; compare as strings or parse
+            if date_from > date_to:
+                date_to = date_from
+    except Exception:
+        # on any parsing issue, ignore and continue
+        date_from = None
+        date_to = None
     today_date = datetime.now().strftime("%Y-%m-%d")
 
     offset = (max(page, 1) - 1) * per_page
