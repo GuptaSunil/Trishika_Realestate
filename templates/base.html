@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{{ title or 'Trishika Properties' }}</title>
+    <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml" />
     <!-- Use Poppins for refined tabular typography -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,7 +14,13 @@
   <body>
     <header class="site-header">
       <div class="container header-inner">
-        <a class="brand" href="{{ url_for('home') }}">Trishika Properties</a>
+        <a class="brand" href="{{ url_for('home') }}">
+          <img src="{{ url_for('static', filename='favicon.svg') }}" alt="Trishika Properties logo" class="brand-logo" />
+          <div>
+            <span>Trishika Properties</span>
+            <small>Real Estate</small>
+          </div>
+        </a>
         <nav class="nav-links">
           <a href="{{ url_for('home') }}" class="{{ 'active' if active_page == 'home' else '' }}">Home</a>
           <a href="{{ url_for('outright') }}" class="{{ 'active' if active_page == 'outright' else '' }}">Outright</a>
@@ -23,6 +30,16 @@
         </nav>
       </div>
     </header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-container">
+          {% for category, message in messages %}
+            <div class="flash flash-{{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
 
     {% block hero %}{% endblock %}
 

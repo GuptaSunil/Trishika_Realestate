@@ -6,13 +6,14 @@ CREATE TABLE IF NOT EXISTS listings (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     title TEXT NOT NULL,
     location TEXT NOT NULL,
-    price TEXT NOT NULL,
+    price NUMERIC(18,2) NOT NULL,
     beds INTEGER NOT NULL,
     baths INTEGER NOT NULL,
     area TEXT NOT NULL,
     description TEXT NOT NULL,
     sale_type TEXT NOT NULL,
-    image_url TEXT NOT NULL
+    image_url TEXT NOT NULL,
+    rental_type TEXT
 );
 
 CREATE TABLE IF NOT EXISTS inquiries (
@@ -30,90 +31,98 @@ DEFAULT_LISTINGS = [
     (
         "Pristine 4BHK Villa",
         "22 Rosewood Avenue, Bengaluru",
-        "₹84,00,000",
+        8400000.00,
         4,
         3,
         "2560 sqft",
         "A beautifully finished villa designed for modern family living with premium finishes.",
         "Outright",
         "https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=900&q=80",
+        None,
     ),
     (
         "City Center 2BHK Apartment",
         "9 Lotus Street, Mumbai",
-        "₹45,00,000",
+        4500000.00,
         2,
         2,
         "1150 sqft",
         "An elegant apartment located in the heart of the city, close to shopping and transit.",
         "Outright",
         "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=900&q=80",
+        None,
     ),
     (
         "Lakeview 3BHK Cottage",
         "18 Amber Lake Road, Pune",
-        "₹68,50,000",
+        6850000.00,
         3,
         2,
         "1320 sqft",
         "A serene cottage with lake views, spacious interiors, and a lush outdoor area.",
         "Outright",
         "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=900&q=80",
+        None,
     ),
     (
         "Luxury 3BHK Rental",
         "7 Park Lane, Hyderabad",
-        "₹45,000/mo",
+        45000.00,
         3,
         3,
         "1400 sqft",
         "Premium rental home with park-facing views and concierge style amenities.",
         "Rental",
         "https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&w=900&q=80",
+        "Monthly",
     ),
     (
         "Cozy 2BHK Rental",
         "5 Jasmine Street, Chennai",
-        "₹28,000/mo",
+        28000.00,
         2,
         2,
         "900 sqft",
         "A comfortable rental apartment in a quiet neighborhood with excellent connectivity.",
         "Rental",
         "https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=900&q=80",
+        "Monthly",
     ),
     (
         "Studio Rental Suite",
         "12 Palm Grove, Delhi",
-        "₹18,000/mo",
+        18000.00,
         1,
         1,
         "550 sqft",
         "Smartly designed studio perfect for young professionals seeking city convenience.",
         "Rental",
         "https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=900&q=80",
+        "Monthly",
     ),
     (
         "Boys PG Near IIT",
         "4 Scholar Street, Bengaluru",
-        "₹10,500/mo",
+        10500.00,
         1,
         1,
         "180 sqft",
         "Affordable and secure PG accommodation for boys with meals and Wi-Fi included.",
         "PG",
         "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=900&q=80",
+        "Monthly",
     ),
     (
         "Girls PG with Food Facility",
         "16 Rose Avenue, Pune",
-        "₹12,000/mo",
+        12000.00,
         1,
         1,
         "200 sqft",
         "Comfortable girls PG with housekeeping, food facility, and a friendly community.",
         "PG",
         "https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=900&q=80",
+        "Monthly",
     ),
 ]
 
@@ -129,28 +138,14 @@ def init_db(database_path: str) -> None:
     conn = get_db_connection(database_path)
     with conn:
         conn.executescript(SCHEMA)
-        columns = [row[1] for row in conn.execute("PRAGMA table_info(listings)").fetchall()]
-        if "sale_type" not in columns:
-            conn.execute("ALTER TABLE listings ADD COLUMN sale_type TEXT NOT NULL DEFAULT 'Outright'")
-        if "image_url" not in columns:
-            conn.execute("ALTER TABLE listings ADD COLUMN image_url TEXT NOT NULL DEFAULT ''")
-
-        # Remove any old dollar-priced listings and keep only the current dataset.
-        # conn.execute("DELETE FROM listings WHERE price LIKE '%$%'")
-
-        for row in DEFAULT_LISTINGS:
-            conn.execute(
-                "UPDATE listings SET image_url = ? WHERE title = ? AND (image_url = '' OR image_url IS NULL)",
-                (row[8], row[0]),
-            )
-
+        
         existing_titles = {row[0] for row in conn.execute("SELECT title FROM listings").fetchall()}
         missing_rows = [row for row in DEFAULT_LISTINGS if row[0] not in existing_titles]
         if missing_rows:
             conn.executemany(
                 """
-                INSERT INTO listings (title, location, price, beds, baths, area, description, sale_type, image_url)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO listings (title, location, price, beds, baths, area, description, sale_type, image_url, rental_type)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 missing_rows,
             )
@@ -160,7 +155,7 @@ def init_db(database_path: str) -> None:
 def get_listings(database_path: str):
     conn = get_db_connection(database_path)
     listings = conn.execute(
-        "SELECT title, location, price, beds, baths, area, description, sale_type, image_url FROM listings"
+        "SELECT title, location, price, beds, baths, area, description, sale_type, image_url, rental_type FROM listings"
     ).fetchall()
     conn.close()
     return listings
@@ -169,7 +164,7 @@ def get_listings(database_path: str):
 def get_listings_by_type(database_path: str, sale_type: str):
     conn = get_db_connection(database_path)
     listings = conn.execute(
-        "SELECT title, location, price, beds, baths, area, description, sale_type, image_url FROM listings WHERE sale_type = ?",
+        "SELECT title, location, price, beds, baths, area, description, sale_type, image_url, rental_type FROM listings WHERE sale_type = ?",
         (sale_type,),
     ).fetchall()
     conn.close()

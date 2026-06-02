@@ -1,6 +1,7 @@
 import os
 from datetime import datetime
 
+from dotenv import load_dotenv
 from flask import Flask, render_template, request, session, redirect, url_for, flash
 from flask_mail import Mail, Message
 
@@ -14,6 +15,7 @@ from database import (
 )
 
 app = Flask(__name__)
+load_dotenv(os.path.join(os.path.dirname(__file__), ".env"))
 app.config["DATABASE"] = os.path.join(os.path.dirname(__file__), "realestate.db")
 app.secret_key = os.getenv("SECRET_KEY", "dev-secret")
 
@@ -23,16 +25,27 @@ app.config["MAIL_PORT"] = int(os.getenv("MAIL_PORT", 587))
 app.config["MAIL_USE_TLS"] = os.getenv("MAIL_USE_TLS", "true").lower() == "true"
 app.config["MAIL_USERNAME"] = os.getenv("MAIL_USERNAME", "")
 app.config["MAIL_PASSWORD"] = os.getenv("MAIL_PASSWORD", "")
-app.config["MAIL_DEFAULT_SENDER"] = os.getenv("MAIL_DEFAULT_SENDER", "noreply@trishikaproperties.com")
+app.config["MAIL_DEFAULT_SENDER"] = os.getenv("MAIL_DEFAULT_SENDER", app.config["MAIL_USERNAME"])
 
 mail = Mail(app)
 
 # Admin email to receive enquiries
-ADMIN_EMAIL = "guPta.sunil561@gmail.com"
+ADMIN_EMAIL = "gupta.sunil561@gmail.com"
 
 # Simple admin credentials (in-memory). For production, use a proper user store.
 ADMIN_USERNAME = os.getenv("ADMIN_USERNAME", "admin")
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "admin")
+
+
+def format_price(price, rental_type):
+    """Format price as currency with appropriate suffix based on rental_type."""
+    if rental_type == "Monthly":
+        return f"₹{price:,.0f}/month"
+    else:
+        return f"₹{price:,.0f}"
+
+
+app.jinja_env.filters['format_price'] = format_price
 
 
 def setup_database():
@@ -237,6 +250,12 @@ def admin_inquiries():
         date_to=date_to,
         today_date=today_date,
     )
+
+
+@app.route("/<path:path>")
+def catch_all(path):
+    """Redirect any undefined routes to home page."""
+    return redirect(url_for("home"))
 
 
 if __name__ == "__main__":

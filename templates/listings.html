@@ -24,7 +24,7 @@
       <span class="type-pill {{ listing.sale_type | lower }}">{{ listing.sale_type }}</span>
       <h3>{{ listing.title }}</h3>
       <p class="location">{{ listing.location }}</p>
-      <p class="price">{{ listing.price }}</p>
+      <p class="price">{{ listing.price | format_price(listing.rental_type) }}</p>
       <div class="specs">
         <span>{{ listing.beds }} beds</span>
         <span>{{ listing.baths }} baths</span>
